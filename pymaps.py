@@ -51,8 +51,6 @@ class PyMap:
             
     """
     
-    class Point:
-        pass
     
     def __init__(self, key=None):
         """ Default values """
@@ -119,19 +117,9 @@ class PyMap:
         self.script = """\n<div id=\"%s\">\n</div>\n""" % (self.id)
         return self.script
     
-    def markerjs(self): 
-        """ Returns javascript for marker windows """
-        
-        self.markerjs =   """
-          function createMarker(point, number) {
-          var marker = new GMarker(point);
-          GEvent.addListener(marker, "click", function() {
-            marker.openInfoWindowHtml("Marker #<b>" + number + "</b>");
-          });
-          return marker;
-        }
-	
-    """
+   
+
+
     def mapjs(self):
         """ Returns complete javacript for rendering map """
         
