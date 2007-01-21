@@ -105,7 +105,10 @@ class PyMap:
             
             
             
-            """ % ("".join(["\n points.push(new GLatLng(%s, %s));" % (k[0], k[1]) for k in self.points if len(k) == 2]), len([v for v in self.points if len(v) == 2]),"".join(["\n points_with_html.push(new GLatLng(%s, %s)); html.push('%s');" % (k[0], k[1], k[2]) for k in self.points if len(k) == 3]),len([v for v in self.points if len(v) ==3]))
+            """ % ("".join(["\n points.push(new GLatLng(%s, %s));" % (k[0], k[1]) for k in self.points if len(k) == 2]), \
+            len([v for v in self.points if len(v) == 2]),\
+            "".join(["\n points_with_html.push(new GLatLng(%s, %s)); html.push('%s');" % (k[0], k[1], k[2]) for k in self.points if len(k) == 3]),\
+            len([v for v in self.points if len(v) ==3]))
 
         else:
             self.pointjs = ""
