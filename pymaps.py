@@ -1,6 +1,6 @@
 """
 
-*    Pymaps 0.1 
+*    Pymaps 0.9 
 
 
 *    Copyright (C) 2007  Ashley Camba <stuff4ash@gmail.com> http://xthought.org
@@ -42,9 +42,20 @@
 
 
 """   
+
+class Icon:
+    def __init__(self,id='icon'):
+        self.id = id
+        self.image = "http://labs.google.com/ridefinder/images/mm_20_red.png"
+        self.shadow = "http://labs.google.com/ridefinder/images/mm_20_shadow.png"
+        self.iconSize = (12, 20)
+        self.shadowSize = (22, 20)
+        self.iconAnchor = (6, 20)
+        self.infoWindowAnchor = (5, 1)
+
         
 class Map:
-    def __init__(self,id="map"):
+    def __init__(self,id="map",pointlist=[]):
         self.id       = id    # div id        
         self.width    = "500px"  # map div width
         self.height   = "300px"  # map div height
@@ -52,7 +63,7 @@ class Map:
         self.zoom        = "1"   # zoom level
         self.navcontrols  =   True   # show google map navigation controls
         self.mapcontrols  =   True   # show toogle map type (sat/map/hybrid) controls
-        self.points = []         # point list
+        self.points =         pointlist   # point list
     
     def __str__(self):
         return self.id
@@ -71,13 +82,15 @@ class PyMap:
     def __str__(self):
         return "Pymap"
     
-    def __init__(self, key=None, maplist=[Map(),]):
+    def __init__(self, key=None, maplist=[Map()], iconlist=[]):
         """ Default values """
         self.key      = key      # set your google key
         self.maps     = maplist
+        self.icons    = iconlist
     
-    
-    
+    def addicon(self,icon):
+        self.icons.append(icon)
+        
     def _navcontroljs(self,map):
         """ Returns the javascript for google maps control"""    
         if map.navcontrols:
@@ -93,23 +106,7 @@ class PyMap:
         else:
             return ""     
     
-    def _renderpointsjs(self,map):
-        
-        
-        js = """   
-        var %s_points_with_html = [];
-        var %s_points = [];    
-        %s
-        %s
-        
-        """ % (map.id, map.id, "".join(["\n %s_points.push(new GLatLng(%s, %s));" % (map.id,k[0], k[1]) for k in map.points if len(k) == 2]), "".join(["\n %s_points_with_html.push(new GLatLng(%s, %s)); %s_html.push('%s');" % (map.id,k[0], k[1],map.id, k[2]) for k in map.points if len(k) == 3]) )
-        #% (map.id, map.id,"".join(["\n %s_points.push(new GLatLng(%s, %s));" % (map.id,k[0], k[1]) for k in map.points if len(k) == 2]), \
-        #    len([v for v in map.points if len(v) == 2]),\
-        #    "".join(["\n %s_points_with_html.push(new GLatLng(%s, %s)); %s_html.push('%s');" % (map.id,k[0], k[1],map.id, k[2]) for k in map.points if len(k) == 3]),\
-        #    len([v for v in map.points if len(v) ==3]))
-
-        return js
-
+    
     def _showdivhtml(self,map):
         """ Returns html for dislaying map """
         html = """\n<div id=\"%s\">\n</div>\n""" % (map.id)
@@ -118,15 +115,35 @@ class PyMap:
     
     
     def _mapjs(self,map):
-        mapjs = """
+        js = """
         %s_points = %s;
         var %s = new Map('%s',%s_points,%s,%s,%s);
-        """ % (map.id,map.points,map.id,map.id,map.id,map.center[0],map.center[1],map.zoom)
-        return mapjs
-   
+        \n\n""" % (map.id,map.points,map.id,map.id,map.id,map.center[0],map.center[1],map.zoom)
+        return js
+    
+    def _iconjs(self,icon):
+        js = """ 
+        var %s = new GIcon(); 
+        %s.image = "%s";  
+        %s.shadow = "%s"; 
+        %s.iconSize = new GSize(%s, %s);   
+        %s.shadowSize = new GSize(%s, %s); 
+       %s.iconAnchor = new GPoint(%s, %s); 
+       %s.infoWindowAnchor = new GPoint(%s, %s); 
+        \n\n """ % (icon.id, icon.id, icon.image, icon.id, icon.shadow, icon.id, icon.iconSize[0],icon.iconSize[1],icon.id, icon.shadowSize[0], icon.shadowSize[1], icon.id, icon.iconAnchor[0],icon.iconAnchor[1], icon.id, icon.infoWindowAnchor[0], icon.infoWindowAnchor[1])
+        return js
+     
+    def _buildicons(self):
+        js = ""
+        if (len(self.icons) > 0):
+            for i in self.icons:
+               js = js + self._iconjs(i)    
+        return js
+    
     def _buildmaps(self):
+        js = ""
         for i in self.maps:
-            js = self._mapjs(i)
+            js = js + self._mapjs(i)
         return js
 
     def pymapjs(self):
@@ -179,7 +196,8 @@ class PyMap:
                   this.points = array2points(this.points);
                   this.markerlist(this.points); 
             }  
-                
+            
+            %s
             %s
                 
                
@@ -189,7 +207,7 @@ class PyMap:
         </script>
         
         
-        """ % (self.key, self._buildmaps())
+        """ % (self.key, self._buildicons(),self._buildmaps())
         return self.js 
     
     
@@ -216,13 +234,17 @@ class PyMap:
 
 
 if __name__ == "__main__":
-        
+    icon = Icon()    
     g = PyMap()
+    g.addicon(icon)
     g.key = "ABQIAAAAQQRAsOk3uqvy3Hwwo4CclBTrVPfEE8Ms0qPwyRfPn-DOTlpaLBTvTHRCdf2V6KbzW7PZFYLT8wFD0A"    
     p = [1,1]
     s = [2,4,'hello']
+    mv = [21,4,None,icon]
     g.maps[0].setpoint(p)
     g.maps[0].setpoint(s)
+    icon = Icon()
+    
     print g.showhtml()
     
     
