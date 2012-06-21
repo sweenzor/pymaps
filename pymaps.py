@@ -26,7 +26,9 @@ Some getting started info here:
 http://lycos.dropcode.net/gregarius/Lonely_Code/2008/12/04/Google_Maps_and_Django
 
 @ and not much of a python programmer either.
+
 """
+
 class Icon:
     '''Get/make marker icons at http://mapki.com/index.php?title=Icon_Image_Sets'''
     def __init__(self,id='icon'):

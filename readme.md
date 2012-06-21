@@ -1,3 +1,8 @@
+# Forked from:
+http://code.google.com/p/pymaps/
+
+
+
 # Introduction
 Pymaps is a little wrapper/hack/script that allows you to create maps (currently only google maps) using python only. The script generates the javascript/html necessary that you can embed in your html pages.
 
